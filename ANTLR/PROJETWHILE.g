@@ -15,41 +15,44 @@ COMMENT
 //règles
 
 program	
-	:	function+ EOF;
+	:	function+ EOF!;
 function
-	:	'function'SYMBOL':'definition;
+    : 'function'^ SYMBOL ':'! definition;
 definition
-	:	'read'input'%'commands'%''write'output;
+    : 'read' input bloc='%' commands '%' 'write' output
+      -> ^('read' input?) ^($bloc commands) ^('write' output);
 input	
 	:	inputsub?;
 inputsub
-	:	VARIABLE','inputsub|VARIABLE;
+    : VARIABLE (','! inputsub)?;
 output
-	:	VARIABLE','output|VARIABLE;
+    : VARIABLE (','! output)?;
 commands
-	:	command(';'commands)?;
+	:	command(';'! commands)?;
 command
 	:	'nop'
 	|	vars ':=' exprs -> ^(':=' vars exprs)
-	|	'if' expression 'then' commands ('else' commands)? 'fi'
-	|	'while' expression 'do' commands 'od'
-	|	'for' expression 'do' commands 'od'
-	|	'foreach' VARIABLE 'in' expression 'do' commands 'od';
+	|   'if' expression 'then' oui=commands ('else' non=commands)? 'fi' -> ^('if' expression ^('then' $oui) ^('else' $non)?)
+	|	'while' expression 'do' commands 'od' -> ^('while' expression ^('do' commands))
+	|	'for' expression 'do' commands 'od' -> ^('for' expression ^('do' commands))
+	|	'foreach' VARIABLE 'in' expression 'do' commands 'od' -> ^('foreach' VARIABLE expression ^('do' commands));
 
 vars
-	:	VARIABLE(','vars)?;
+	:	VARIABLE(','^ vars)?;
 
 exprs
-	:	expression(','exprs)?;
+	:	expression(','^ exprs)?;
 
 exprbase
-	:	'nil'|VARIABLE|SYMBOL
-	|	'(''cons'lexpr')'|'(''list'lexpr')'
-	|	'(''hd'exprbase')'|'(''tl'exprbase')'
-	|	'('SYMBOL lexpr')';
+    : 'nil' | VARIABLE | SYMBOL
+    | '('! 'cons'^ lexpr ')'!
+    | '('! 'list'^ lexpr ')'!
+    | '('! 'hd'^ exprbase ')'!
+    | '('! 'tl'^ exprbase ')'!
+    | '('^ SYMBOL lexpr ')'!;
 
 expression
-	:	exprbase('=?'exprbase)?;
+	:	exprbase('=?'^ exprbase)?;
 
 lexpr
 	:	(exprbase lexpr)?;
