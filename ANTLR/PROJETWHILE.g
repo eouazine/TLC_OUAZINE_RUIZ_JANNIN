@@ -1,5 +1,7 @@
 grammar PROJETWHILE;
 
+options { output=AST; } //Crée un arbre AST
+
 //tokens
 VARIABLE
 	:	MAJ (MAJ | MIN | DEC)* ('!' | '?')?;
