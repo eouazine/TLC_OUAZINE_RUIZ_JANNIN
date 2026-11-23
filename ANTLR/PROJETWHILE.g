@@ -30,7 +30,7 @@ commands
 	:	command(';'commands)?;
 command
 	:	'nop'
-	|	vars ':=' exprs
+	|	vars ':=' exprs -> ^(':=' vars exprs)
 	|	'if' expression 'then' commands ('else' commands)? 'fi'
 	|	'while' expression 'do' commands 'od'
 	|	'for' expression 'do' commands 'od'
